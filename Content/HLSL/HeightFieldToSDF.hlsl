@@ -14,10 +14,16 @@ float delta = float(1.0/numSamples);
 float  shortestDist = 2.0;
 float2 shortestCoord = float2(1.0, 1.0);
 
-const float col = Texture2DSample(depthMap, depthMapSampler, texCoords).r;
+float col = Texture2DSample(depthMap, depthMapSampler, texCoords).r;
+
+if (InInvertDepthMap > 0.0)
+{
+    col = 1 - col;
+}
+
 if (col >= surfaceBoundary)
 {
-    return float3(texCoords, 0);
+    return InInvertDepthMap > 0.0 ? float3(1, 1, 1) : float3(0, 0, 0);
 }
 
 for (float radius = 0; radius <= 1.0; radius = radius + delta)
@@ -38,6 +44,11 @@ for (float radius = 0; radius <= 1.0; radius = radius + delta)
 
         float texVal = depthMap.SampleGrad(depthMapSampler, currTexCoords, DDX, DDY).r;
 
+        if (InInvertDepthMap > 0.0)
+        {
+            texVal = 1 - texVal;
+        }
+
         if (texVal < surfaceBoundary)
         {
             continue;
@@ -57,9 +68,9 @@ for (float radius = 0; radius <= 1.0; radius = radius + delta)
     }
 }
 
-// const float3 colOut = float3(shortestDist, 0, 0);
+const float3 colOut = float3(shortestDist, 0, 0);
 // const float3 colOut = float3(length(shortestCoord - texCoords), 0, 0);
-const float3 colOut = float3(shortestCoord, 0);
+// const float3 colOut = float3(shortestCoord, 0);
 
 return colOut;
 
