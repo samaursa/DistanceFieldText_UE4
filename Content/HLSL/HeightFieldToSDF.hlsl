@@ -56,9 +56,10 @@ for (float radius = 0; radius <= 1.0; radius = radius + delta)
     }
 }
 
-const float3 colOut = float3(shortestDist, 0, 0);
-// float2 normalizedCol = ((shortestCoord - texCoords) + 1) / 2;
-// const float3 colOut = float3(normalizedCol, 0);
-// const float3 colOut = float3(shortestCoord, 0);
+// const float3 colOut = float3(length(shortestCoord - texCoords), 0, 0);
+//float2 normalizedCol = (shortestCoord - texCoords) + 1) / 2;
+float2 normalizedCol = (normalize(shortestCoord - texCoords) + 1) / 2;
+const float3 colOut = float3(normalizedCol, shortestDist);
+// const float3 colOut = float3(0, 0, shortestDist);
 
-return colOut;
+return colOut * ColorMultiplier;

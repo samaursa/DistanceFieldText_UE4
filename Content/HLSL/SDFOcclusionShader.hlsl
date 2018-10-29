@@ -11,12 +11,10 @@ float3 currTexCoord = float3(texCoords, 0);
 float selectedMinDistance = 1.0;
 float2 selectedTexCoord;
 
-return float3(0, 0, Texture2DSample(SDFMap, SDFMapSampler, texCoords).b);
-
 for (int i = 0; i < InSamples; i++)
 {
-    // float2 nearestTexCoord = SDFMap.SampleGrad(SDFMapSampler, currTexCoord.xy, DDX, DDY).xy;
-    // currDis = length(nearestTexCoord - texCoords);
+    float2 surfDir = SDFMap.SampleGrad(SDFMapSampler, currTexCoord.xy, DDX, DDY).rg;
+    surfDir = (surfDir * 2) - 1;
 
     currDis = SDFMap.SampleGrad(SDFMapSampler, currTexCoord.xy, DDX, DDY).b;
 
