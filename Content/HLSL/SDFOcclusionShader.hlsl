@@ -8,33 +8,45 @@ float currDis = 1.0;
 float3 prevTexCoord;
 float3 currTexCoord = float3(texCoords, 0);
 
+float selectedMinDistance = 1.0;
+float2 selectedTexCoord;
+
+return float3(0, 0, Texture2DSample(SDFMap, SDFMapSampler, texCoords).b);
+
 for (int i = 0; i < InSamples; i++)
 {
-    currDis = SDFMap.SampleGrad(SDFMapSampler, currTexCoord.xy, DDX, DDY).r;
+    // float2 nearestTexCoord = SDFMap.SampleGrad(SDFMapSampler, currTexCoord.xy, DDX, DDY).xy;
+    // currDis = length(nearestTexCoord - texCoords);
+
+    currDis = SDFMap.SampleGrad(SDFMapSampler, currTexCoord.xy, DDX, DDY).b;
+
     prevTexCoord = currTexCoord;
     currTexCoord = prevTexCoord + (viewDirNorm * currDis);
 
     if (currDis < minDistance)
     {
+        selectedTexCoord = currTexCoord;
         break;
     }
 
     if (abs(currTexCoord.z) > maxHeight)
     {
+        selectedTexCoord = currTexCoord;
         break;
     }
 
     if (currTexCoord.x > 1.0 || currTexCoord.y > 1.0 ||
         currTexCoord.x < 0.0 || currTexCoord.y < 0.0)
     {
-        return texCoords;
+        selectedTexCoord = saturate(currTexCoord);
+        break;
+    }
+
+    if (currDis < selectedMinDistance)
+    {
+        selectedMinDistance = currDis;
+        selectedTexCoord = currTexCoord;
     }
 }
 
-currTexCoord = saturate(currTexCoord);
-
-float afterDis = Texture2DSample(SDFMap, SDFMapSampler, currTexCoord).r;
-float weight = afterDis / (afterDis - currDis);
-float2 finalTexCoord = prevTexCoord * weight + currTexCoord * (1.0 - weight);
-
-return prevTexCoord;
+return selectedTexCoord;
